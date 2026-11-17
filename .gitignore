@@ -1,0 +1,17 @@
+# Original-Erweiterungen von Drittanbietern (nicht weiterverbreiten)
+*.xpi
+*.crx
+*.pem
+
+# Build-Artefakte
+dist/
+*.zip
+
+# System
+.DS_Store
+Thumbs.db
+desktop.ini
+.claude/
+
+# Vom Browser beim Laden erzeugt
+extension/_metadata/

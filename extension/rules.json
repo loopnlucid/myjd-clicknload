@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": { "type": "redirect", "redirect": { "extensionPath": "/cnl/jdcheck.js" } },
+    "condition": {
+      "regexFilter": "^https?://(127\\.0\\.0\\.1|localhost):9666/jdcheck\\.js",
+      "resourceTypes": ["script", "xmlhttprequest", "sub_frame", "main_frame", "other"]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": { "type": "redirect", "redirect": { "extensionPath": "/cnl/crossdomain.xml" } },
+    "condition": {
+      "regexFilter": "^https?://(127\\.0\\.0\\.1|localhost):9666/crossdomain\\.xml",
+      "resourceTypes": ["xmlhttprequest", "sub_frame", "main_frame", "other", "object"]
+    }
+  },
+  {
+    "id": 3,
+    "priority": 1,
+    "action": { "type": "redirect", "redirect": { "extensionPath": "/cnl/flash.txt" } },
+    "condition": {
+      "regexFilter": "^https?://(127\\.0\\.0\\.1|localhost):9666/flash/?$",
+      "resourceTypes": ["script", "xmlhttprequest", "sub_frame", "main_frame", "other"]
+    }
+  }
+]
