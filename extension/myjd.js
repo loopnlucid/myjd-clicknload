@@ -1,10 +1,10 @@
-// Minimaler MyJDownloader-API-Client (https://api.jdownloader.org) auf Basis von WebCrypto.
-// Protokoll nachgebaut nach der offiziellen jdapi.js (AppWork):
-//   loginSecret  = SHA256(email.lower + passwort + "server")
-//   deviceSecret = SHA256(email.lower + passwort + "device")
+// Minimal MyJDownloader API client (https://api.jdownloader.org) based on WebCrypto.
+// Protocol as used by the official MyJDownloader web clients:
+//   loginSecret  = SHA256(email.lower + password + "server")
+//   deviceSecret = SHA256(email.lower + password + "device")
 //   serverToken  = SHA256(loginSecret  || hex(sessiontoken))
 //   deviceToken  = SHA256(deviceSecret || hex(sessiontoken))
-//   AES-128-CBC mit IV = erste 16 Byte, Key = letzte 16 Byte des jeweiligen Secrets.
+//   AES-128-CBC with IV = first 16 bytes, key = last 16 bytes of the respective secret.
 
 export const API_ROOT = "https://api.jdownloader.org";
 export const APP_KEY = "myjd_cnl_chrome";
@@ -58,7 +58,7 @@ async function decrypt(secret, b64) {
   return td.decode(pt);
 }
 
-/** Leitet die beiden Secrets aus E-Mail und Passwort ab (Passwort wird nicht gespeichert). */
+/** Derives both secrets from email and password (the password itself is not stored). */
 export async function deriveSecrets(email, password) {
   const e = email.trim().toLowerCase();
   return {
@@ -113,8 +113,8 @@ async function signedGet(path, params, signKey, decryptKey) {
 }
 
 /**
- * Baut eine Session auf. creds = {email, loginSecret(hex), deviceSecret(hex)}.
- * Liefert {sessiontoken, regaintoken, serverToken(hex), deviceToken(hex)}.
+ * Opens a session. creds = {email, loginSecret(hex), deviceSecret(hex)}.
+ * Returns {sessiontoken, regaintoken, serverToken(hex), deviceToken(hex)}.
  */
 export async function connect(creds) {
   const loginSecret = hexToBytes(creds.loginSecret);
@@ -142,7 +142,7 @@ export async function disconnect(session) {
   } catch {}
 }
 
-/** Ruft eine Methode auf dem JDownloader-Gerät auf, z. B. "/linkgrabberv2/addLinks". */
+/** Calls a method on the JDownloader device, e.g. "/linkgrabberv2/addLinks". */
 export async function deviceCall(session, deviceId, action, params = []) {
   const dt = hexToBytes(session.deviceToken);
   const rid = nextRid();

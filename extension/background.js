@@ -4,7 +4,7 @@ const CNL_URL_RE = /^https?:\/\/(?:127\.0\.0\.1|localhost):9666\/flash\/(?:add|a
 const SCRIPT_IDS = ["myjd-cnl-main", "myjd-cnl-bridge"];
 const HISTORY_MAX = 30;
 
-// ---------------------------------------------------------------- Einstellungen
+// ---------------------------------------------------------------- Settings
 
 async function getSettings() {
   const s = await chrome.storage.local.get(null);
@@ -62,7 +62,7 @@ async function callDevice(action, params) {
   }
 }
 
-// ---------------------------------------------------------------- Links an JD senden
+// ---------------------------------------------------------------- Sending links to JDownloader
 
 function hexUtf8(str) {
   return Array.from(new TextEncoder().encode(str), (b) => b.toString(16).padStart(2, "0")).join("");
@@ -85,7 +85,7 @@ async function addLinks(query) {
   return settings;
 }
 
-// Doppelte Übermittlungen (Seiten-Hook + Netzwerk-Fallback) innerhalb kurzer Zeit ignorieren.
+// Ignore duplicate submissions (page hook + network fallback) within a short time window.
 const recent = new Map();
 function isDuplicate(key) {
   const now = Date.now();
@@ -97,11 +97,11 @@ function isDuplicate(key) {
 
 async function handleCnl({ fields, pageUrl, pageTitle, via }) {
   const f = firstValues(fields);
-  if (!f.crypted && !f.urls) return { ok: false, error: "Keine CNL-Daten gefunden" };
+  if (!f.crypted && !f.urls) return { ok: false, error: "No Click'n'Load data found" };
   if (isDuplicate((f.crypted || "") + "|" + (f.jk || "") + "|" + (f.urls || ""))) return { ok: true, duplicate: true };
 
-  // Wie das Original-Plugin: Die CNL-Daten gehen als "dummycnl"-Link an JDownloader,
-  // der die Entschlüsselung (jk/crypted) selbst übernimmt.
+  // The CNL data is passed to JDownloader as a "dummycnl" link; JDownloader
+  // decrypts jk/crypted itself (same approach as the former official extension).
   let links = "https://dummycnl.jdownloader.org/#" + encodeURIComponent(hexUtf8(JSON.stringify(f)));
   if (f.urls && !f.crypted) links += "\r\n" + f.urls;
 
@@ -114,13 +114,13 @@ async function handleCnl({ fields, pageUrl, pageTitle, via }) {
   try {
     const settings = await addLinks(query);
     await log({ ok: true, title, source: src, via });
-    notify(settings, "An JDownloader gesendet", `${title}\n→ ${settings.deviceName || "JDownloader"}`);
+    notify(settings, "Sent to JDownloader", `${title}\n→ ${settings.deviceName || "JDownloader"}`);
     flashBadge("OK", "#2e7d32");
     return { ok: true };
   } catch (e) {
     const msg = errorText(e);
     await log({ ok: false, title, source: src, via, error: msg });
-    notify(await getSettings(), "Senden fehlgeschlagen", `${title}\n${msg}`, true);
+    notify(await getSettings(), "Sending failed", `${title}\n${msg}`, true);
     flashBadge("ERR", "#c62828");
     return { ok: false, error: msg };
   }
@@ -130,13 +130,13 @@ function errorText(e) {
   const t = e && e.type;
   switch (t) {
     case "NOT_CONFIGURED":
-      return "Erweiterung ist noch nicht eingerichtet (Optionen öffnen).";
+      return "The extension is not set up yet (open the options).";
     case "AUTH_FAILED":
     case "EMAIL_INVALID":
-      return "Anmeldung bei MyJDownloader fehlgeschlagen – Zugangsdaten in den Optionen prüfen.";
+      return "MyJDownloader login failed – please check your credentials in the options.";
     case "OFFLINE":
     case "DEVICE_OFFLINE":
-      return "Der JDownloader ist offline bzw. nicht mit MyJDownloader verbunden.";
+      return "The JDownloader is offline or not connected to MyJDownloader.";
     default:
       return (e && e.message) || String(e);
   }
@@ -171,7 +171,7 @@ async function updateBadge() {
   const s = await getSettings();
   if (!s.enabled) {
     chrome.action.setBadgeBackgroundColor({ color: "#777" });
-    chrome.action.setBadgeText({ text: "AUS" });
+    chrome.action.setBadgeText({ text: "OFF" });
   } else if (!isConfigured(s)) {
     chrome.action.setBadgeBackgroundColor({ color: "#e65100" });
     chrome.action.setBadgeText({ text: "!" });
@@ -180,7 +180,7 @@ async function updateBadge() {
   }
 }
 
-// ---------------------------------------------------------------- Content-Scripts / Regeln je nach Status
+// ---------------------------------------------------------------- Content scripts / rules depending on state
 
 async function syncInterception() {
   const s = await getSettings();
@@ -228,10 +228,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
-// ---------------------------------------------------------------- Netzwerk-Fallback
-// Fängt CNL-Requests ab, die nicht schon in der Seite abgefangen wurden (z. B. direkte
-// Navigationen oder iframes). Nur beobachtend – der Request selbst läuft ins Leere,
-// da lokal kein JDownloader auf Port 9666 lauscht.
+// ---------------------------------------------------------------- Network fallback
+// Catches CNL requests that were not already intercepted inside the page (e.g. direct
+// navigations or iframes). Observe-only – the request itself goes nowhere because no
+// local JDownloader is listening on port 9666.
 
 function parseUrlEncoded(str, into) {
   for (const [k, v] of new URLSearchParams(str)) (into[k] ||= []).push(v);
@@ -278,7 +278,7 @@ chrome.webRequest.onBeforeRequest.addListener(
   ["requestBody"]
 );
 
-// ---------------------------------------------------------------- Nachrichten
+// ---------------------------------------------------------------- Messages
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
@@ -306,19 +306,19 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         if (sender.tab) chrome.tabs.remove(sender.tab.id);
         return { ok: true };
     }
-    return { ok: false, error: "unbekannte Nachricht" };
+    return { ok: false, error: "unknown message" };
   })()
     .then(sendResponse)
     .catch((e) => sendResponse({ ok: false, error: errorText(e), type: e.type }));
   return true;
 });
 
-// ---------------------------------------------------------------- Kontextmenü
+// ---------------------------------------------------------------- Context menu
 
 function setupContextMenus() {
   chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({ id: "send-link", title: "Link an JDownloader senden", contexts: ["link"] });
-    chrome.contextMenus.create({ id: "send-selection", title: "Markierten Text an JDownloader senden", contexts: ["selection"] });
+    chrome.contextMenus.create({ id: "send-link", title: "Send link to JDownloader", contexts: ["link"] });
+    chrome.contextMenus.create({ id: "send-selection", title: "Send selected text to JDownloader", contexts: ["selection"] });
   });
 }
 
@@ -329,12 +329,12 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   try {
     const settings = await addLinks({ links, sourceUrl: (tab && tab.url) || undefined });
     await log({ ok: true, title, source: tab && tab.url, via: "contextmenu" });
-    notify(settings, "An JDownloader gesendet", `${title}\n→ ${settings.deviceName || "JDownloader"}`);
+    notify(settings, "Sent to JDownloader", `${title}\n→ ${settings.deviceName || "JDownloader"}`);
     flashBadge("OK", "#2e7d32");
   } catch (e) {
     const msg = errorText(e);
     await log({ ok: false, title, source: tab && tab.url, via: "contextmenu", error: msg });
-    notify(await getSettings(), "Senden fehlgeschlagen", msg, true);
+    notify(await getSettings(), "Sending failed", msg, true);
     flashBadge("ERR", "#c62828");
   }
 });

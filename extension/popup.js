@@ -5,13 +5,13 @@ async function render() {
   $("enabled").checked = s.enabled !== false;
   const st = $("state");
   if (!s.loginSecret) {
-    st.textContent = "Nicht angemeldet – bitte Einstellungen öffnen.";
+    st.textContent = "Not logged in – please open the settings.";
     st.className = "status warn";
   } else if (!s.deviceId) {
-    st.textContent = "Kein JDownloader ausgewählt.";
+    st.textContent = "No JDownloader selected.";
     st.className = "status warn";
   } else {
-    st.textContent = `Ziel: ${s.deviceName || s.deviceId}`;
+    st.textContent = `Target: ${s.deviceName || s.deviceId}`;
     st.className = "status " + (s.enabled === false ? "muted" : "ok");
   }
   const ul = $("history");
@@ -20,7 +20,7 @@ async function render() {
   if (!hist.length) {
     const li = document.createElement("li");
     li.className = "muted";
-    li.textContent = "Noch nichts gesendet.";
+    li.textContent = "Nothing sent yet.";
     ul.appendChild(li);
   }
   for (const h of hist) {
@@ -31,7 +31,7 @@ async function render() {
     t.title = h.source || "";
     const m = document.createElement("div");
     m.className = "m";
-    m.textContent = new Date(h.time).toLocaleString("de-AT") + (h.error ? " – " + h.error : "");
+    m.textContent = new Date(h.time).toLocaleString() + (h.error ? " – " + h.error : "");
     li.append(t, m);
     ul.appendChild(li);
   }

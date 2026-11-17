@@ -1,13 +1,17 @@
 # Changelog
 
+## 1.0.1 – 2026-11-17
+
+- Entire project translated to English (user interface, documentation, code comments, test page)
+
 ## 1.0.0 – 2026-11-17
 
-Erste Version.
+Initial release.
 
-- Click'n'Load-Abfang für Formulare, `fetch`, XHR, `window.open`, Links und iframes
-- Antworten auf `jdcheck.js`, `crossdomain.xml` und `/flash/`
-- Weiterleitung über die MyJDownloader-API (`/linkgrabberv2/addLinks`, dummycnl)
-- Einstellungsseite mit Anmeldung, Geräteauswahl und Verbindungstest
-- Popup mit Verlauf und Ein/Aus-Schalter
-- Kontextmenü für Links und markierten Text
-- Optionen: Autostart, Zielordner, Benachrichtigungen
+- Click'n'Load interception for forms, `fetch`, XHR, `window.open`, links and iframes
+- Responses for `jdcheck.js`, `crossdomain.xml` and `/flash/`
+- Forwarding via the MyJDownloader API (`/linkgrabberv2/addLinks`, dummycnl)
+- Settings page with login, device selection and connection test
+- Popup with history and on/off switch
+- Context menu for links and selected text
+- Options: autostart, download folder, notifications

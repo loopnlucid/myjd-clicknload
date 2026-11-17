@@ -1,5 +1,5 @@
-// Läuft im Kontext der Webseite (world: MAIN) und fängt Click'n'Load-Übermittlungen an
-// http://127.0.0.1:9666 ab, bevor der Browser sie überhaupt absendet.
+// Runs in the context of the web page (world: MAIN) and intercepts Click'n'Load submissions to
+// http://127.0.0.1:9666 before the browser even sends them.
 (() => {
   if (window.__myjdCnlHooked) return;
   Object.defineProperty(window, "__myjdCnlHooked", { value: true });
@@ -13,7 +13,7 @@
   const CROSSDOMAIN_XML =
     '<?xml version="1.0" ?>\n<cross-domain-policy>\n<site-control permitted-cross-domain-policies="master-only"/>\n<allow-access-from domain="*"/>\n<allow-http-request-headers-from domain="*" headers="*"/>\n</cross-domain-policy>';
 
-  // Viele Seiten prüfen per jdcheck.js, ob JDownloader läuft.
+  // Many sites use jdcheck.js to check whether JDownloader is running.
   try {
     if (window.jdownloader === undefined) window.jdownloader = true;
   } catch {}
@@ -61,7 +61,7 @@
     return "success\r\n";
   };
 
-  // ------------------------------------------------------------ Formulare
+  // ------------------------------------------------------------ Forms
 
   const formAction = (form, submitter) => {
     const a = (submitter && submitter.getAttribute && submitter.getAttribute("formaction")) || form.getAttribute("action") || "";
@@ -88,7 +88,7 @@
     return origSubmit.apply(this, arguments);
   };
 
-  // Bubble-Phase: Seiten-Handler (die Felder evtl. noch befüllen) sind dann schon gelaufen.
+  // Bubble phase: page handlers (which may still fill in fields) have already run by then.
   window.addEventListener("submit", (e) => {
     const form = e.target;
     if (!(form instanceof HTMLFormElement) || e.defaultPrevented) return;

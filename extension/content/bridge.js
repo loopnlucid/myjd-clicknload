@@ -1,4 +1,4 @@
-// Isolierte Welt: reicht die in der Seite abgefangenen CNL-Daten an den Service Worker weiter.
+// Isolated world: forwards the CNL data intercepted in the page to the service worker.
 (() => {
   if (window.__myjdCnlBridge) return;
   window.__myjdCnlBridge = true;
@@ -9,7 +9,7 @@
     try {
       chrome.runtime.sendMessage({ type: "cnl", fields, via, pageUrl, pageTitle }).catch(() => {});
     } catch {
-      // Erweiterung wurde neu geladen – Seite neu laden.
+      // The extension was reloaded – the page needs to be reloaded.
     }
   });
 })();

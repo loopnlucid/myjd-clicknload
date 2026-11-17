@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "MyJD Click'n'Load",
   "short_name": "MyJD CNL",
-  "version": "1.0.0",
-  "description": "Leitet Click'n'Load-Buttons und Links an deinen JDownloader über MyJDownloader weiter.",
+  "version": "1.0.1",
+  "description": "Forwards Click'n'Load buttons and links to your JDownloader via MyJDownloader.",
   "homepage_url": "https://github.com/loopnlucid/myjd-clicknload",
   "minimum_chrome_version": "111",
   "icons": {

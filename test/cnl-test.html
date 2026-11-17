@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><title>CNL-Test</title>
+<html lang="en"><head><meta charset="utf-8"><title>CNL test</title>
 <script src="http://127.0.0.1:9666/jdcheck.js"></script></head>
 <body style="font-family:system-ui;max-width:600px;margin:40px auto">
-<h1>Click'n'Load-Testseite</h1>
+<h1>Click'n'Load test page</h1>
 <p>jdcheck: <b id="jd"></b></p>
-<script>document.getElementById('jd').textContent = (typeof jdownloader !== 'undefined' && jdownloader) ? 'JDownloader erkannt ✔' : 'nicht erkannt ✖';</script>
+<script>document.getElementById('jd').textContent = (typeof jdownloader !== 'undefined' && jdownloader) ? 'JDownloader detected ✔' : 'not detected ✖';</script>
 <form action="http://127.0.0.1:9666/flash/add" method="post" target="hidden">
   <input type="hidden" name="urls" value="https://www.example.com/cnl-test.html">
   <input type="hidden" name="source" value="https://www.example.com/">
   <input type="hidden" name="package" value="CNL-Test">
-  <button type="submit">Test-Link per Click'n'Load senden</button>
+  <button type="submit">Send test link via Click'n'Load</button>
 </form>
 <iframe name="hidden" style="display:none"></iframe>
-<p>Danach sollte im LinkGrabber deines JDownloaders ein Paket „CNL-Test“ mit example.com auftauchen.</p>
+<p>Afterwards a package named "CNL-Test" containing an example.com link should appear in your JDownloader's LinkGrabber.</p>
 </body></html>

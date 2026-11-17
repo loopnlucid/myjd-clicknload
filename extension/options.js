@@ -5,6 +5,7 @@ const setStatus = (el, text, cls = "") => {
   $(el).textContent = text;
   $(el).className = "status " + cls;
 };
+const foundText = (n) => (n ? `${n} device(s) found.` : "No JDownloader is connected to this account.");
 
 let creds = null;
 
@@ -32,7 +33,7 @@ function fillDevices(list, selected) {
   const sel = $("device");
   sel.innerHTML = "";
   if (!list.length) {
-    sel.innerHTML = '<option value="">– kein JDownloader online –</option>';
+    sel.innerHTML = '<option value="">– no JDownloader online –</option>';
     return;
   }
   for (const d of list) {
@@ -47,7 +48,7 @@ function fillDevices(list, selected) {
 
 async function loadDevices(selected) {
   if (!creds) return;
-  setStatus("deviceStatus", "Lade Geräte …");
+  setStatus("deviceStatus", "Loading devices …");
   const r = await chrome.runtime.sendMessage({ type: "listDevices", ...creds });
   if (!r.ok) {
     setStatus("deviceStatus", r.error, "err");
@@ -55,7 +56,7 @@ async function loadDevices(selected) {
   }
   const list = r.devices.filter((d) => !d.type || d.type === "jd");
   fillDevices(list, selected);
-  setStatus("deviceStatus", list.length ? `${list.length} Gerät(e) gefunden.` : "Kein JDownloader mit diesem Konto verbunden.", list.length ? "ok" : "warn");
+  setStatus("deviceStatus", foundText(list.length), list.length ? "ok" : "warn");
   if (list.length && !selected) await saveDevice();
   return true;
 }
@@ -69,14 +70,14 @@ async function saveDevice() {
 $("login").addEventListener("click", async () => {
   const email = $("email").value.trim();
   const pw = $("password").value;
-  if (!email || !pw) return setStatus("loginStatus", "Bitte E-Mail und Passwort eingeben.", "err");
+  if (!email || !pw) return setStatus("loginStatus", "Please enter your email and password.", "err");
   $("login").disabled = true;
-  setStatus("loginStatus", "Melde an …");
+  setStatus("loginStatus", "Logging in …");
   try {
     const c = await deriveSecrets(email, pw);
     const r = await chrome.runtime.sendMessage({ type: "listDevices", ...c });
     if (!r.ok) {
-      setStatus("loginStatus", (r.type === "AUTH_FAILED" || r.type === "EMAIL_INVALID") ? "E-Mail oder Passwort falsch." : r.error, "err");
+      setStatus("loginStatus", r.type === "AUTH_FAILED" || r.type === "EMAIL_INVALID" ? "Wrong email or password." : r.error, "err");
       return;
     }
     creds = c;
@@ -84,10 +85,10 @@ $("login").addEventListener("click", async () => {
     const { deviceId } = await chrome.storage.local.get("deviceId");
     await chrome.storage.local.set({ ...c });
     showLoggedIn(c.email);
-    setStatus("loginStatus", "Erfolgreich angemeldet.", "ok");
+    setStatus("loginStatus", "Logged in successfully.", "ok");
     const list = r.devices.filter((d) => !d.type || d.type === "jd");
     fillDevices(list, deviceId);
-    setStatus("deviceStatus", list.length ? `${list.length} Gerät(e) gefunden.` : "Kein JDownloader mit diesem Konto verbunden.", list.length ? "ok" : "warn");
+    setStatus("deviceStatus", foundText(list.length), list.length ? "ok" : "warn");
     await saveDevice();
   } catch (e) {
     setStatus("loginStatus", String(e.message || e), "err");
@@ -101,32 +102,31 @@ $("logout").addEventListener("click", async () => {
   await chrome.storage.session.remove("session");
   creds = null;
   showLoggedIn("");
-  fillDevices([], "");
-  $("device").innerHTML = '<option value="">– erst anmelden –</option>';
-  setStatus("loginStatus", "Abgemeldet.");
+  $("device").innerHTML = '<option value="">– log in first –</option>';
+  setStatus("loginStatus", "Logged out.");
   setStatus("deviceStatus", "");
 });
 
 $("device").addEventListener("change", async () => {
   await saveDevice();
-  setStatus("deviceStatus", "Gerät gespeichert.", "ok");
+  setStatus("deviceStatus", "Device saved.", "ok");
 });
 $("reload").addEventListener("click", () => loadDevices($("device").value));
 $("test").addEventListener("click", async () => {
-  setStatus("deviceStatus", "Teste …");
+  setStatus("deviceStatus", "Testing …");
   const r = await chrome.runtime.sendMessage({ type: "test" });
-  setStatus("deviceStatus", r.ok ? `JDownloader „${r.deviceName}“ antwortet. ✔` : r.error, r.ok ? "ok" : "err");
+  setStatus("deviceStatus", r.ok ? `JDownloader "${r.deviceName}" is responding. ✔` : r.error, r.ok ? "ok" : "err");
 });
 
-for (const [id, key] of [["enabled", "enabled"], ["autostart", "autostart"], ["notifications", "notifications"]]) {
+for (const id of ["enabled", "autostart", "notifications"]) {
   $(id).addEventListener("change", async () => {
-    await chrome.storage.local.set({ [key]: $(id).checked });
-    setStatus("optStatus", "Gespeichert.", "ok");
+    await chrome.storage.local.set({ [id]: $(id).checked });
+    setStatus("optStatus", "Saved.", "ok");
   });
 }
 $("dest").addEventListener("change", async () => {
   await chrome.storage.local.set({ destinationFolder: $("dest").value.trim() });
-  setStatus("optStatus", "Gespeichert.", "ok");
+  setStatus("optStatus", "Saved.", "ok");
 });
 
 load();
